@@ -4,6 +4,8 @@ window.addEventListener('load', function(){
   let GAME_HEIGHT = 360;
 
   let gameLive = true;
+  let gameOver = false;
+  let finishGame = false;
 
   //враги
   let enemies = [
@@ -11,57 +13,57 @@ window.addEventListener('load', function(){
       x: 100, 
       y: 100, 
       speedY: 1, 
-      w: 40, 
-      h: 40 
+      w: 30, 
+      h: 30 
     },
     {
       x: 260,
       y: 100,
       speedY: 2,
-      w: 40,
-      h: 40
+      w: 30,
+      h: 30
     },
     {
       x: 380,
       y: 100,
       speedY: 1,
-      w: 40,
-      h: 40
+      w: 30,
+      h: 30
     },
     {
       x: 450,
       y: 100,
       speedY: 2,
-      w: 40,
-      h: 40
+      w: 30,
+      h: 30
     }
   ];
 //обьет игрока
   let player = {
-    x:10,
-    y:160,
-    speedX:2,
-    w:40,
-    h:40,
-    isMoving:false
+    x: 10,
+    y: 160,
+    speedX: 4,
+    w: 45,
+    h: 45,
+    isMoving: false
   };
 
   //finish
   let goal = {
-    x:580,
-    y:160,
-    w:50,
-    h:36
+    x: 580,
+    y: 160,
+    w: 50,
+    h: 36
   }
   let sprites = {};
 
   //movePlayer
-  let movePlayer = function(){
+  let movePlayer = () => {
     player.isMoving = true;
   };
 
   //stopPlayer
-  let stopPlayer = function(){
+  let stopPlayer = () => {
     player.isMoving = false;
   };
     //получить контекст
@@ -75,30 +77,29 @@ window.addEventListener('load', function(){
     canvas.addEventListener('touchstart', movePlayer);
     canvas.addEventListener('touchend', stopPlayer);
 
-    let load = function() {
+    let load = () => {
       sprites.player = new Image();
-      sprites.player.src = 'img/hero.png';
+      sprites.player.src = 'img/colibri.png';
 
       sprites.background = new Image();
-      sprites.background.src = 'img/floor.png';
+      sprites.background.src = 'img/jungle.png';
 
       sprites.enemy = new Image();
-      sprites.enemy.src = 'img/enemy.png';
+      sprites.enemy.src = 'img/bat.png';
 
       sprites.goal = new Image();
-      sprites.goal.src = 'img/chest.png';
+      sprites.goal.src = 'img/flower.png';
     };
 
 
     //логика обьектов
-  let update = function() {
+  let update = () => {
 
     //проверка на финиш
     if(chekCollision(player, goal)){
       //stop game
       gameLive = false;
-
-      alert ('You WIN');
+      finishGame = true;
     }
       //игрок
     if(player.isMoving) {
@@ -106,14 +107,12 @@ window.addEventListener('load', function(){
     }
 
     //враги
-    enemies.forEach(function(element, index){
+    enemies.forEach(element => {
 
     if(chekCollision(player, element)){
       //stop
       gameLive = false;
-
-      alert("Game OVER");
-    window.location = "";
+      gameOver = true;
     }
     element.y += element.speedY;
 
@@ -129,7 +128,7 @@ window.addEventListener('load', function(){
   };
 
   //показать обьекты на экране.
-  let draw = function(){
+  let draw = () => {
     //чистим холст
     ctx.clearRect(0,0,GAME_WIDTH,GAME_HEIGHT);
 
@@ -140,7 +139,7 @@ window.addEventListener('load', function(){
     ctx.drawImage(sprites.player, player.x, player.y);
 
   //обьекты врагов
-    enemies.forEach(function(element){
+    enemies.forEach(element => {
       ctx.drawImage(sprites.enemy, element.x, element.y);
     });
 
@@ -152,15 +151,45 @@ window.addEventListener('load', function(){
 
     update();
     draw();
+
     if(gameLive){
       window.requestAnimationFrame(step);
     }
+
+    if(gameOver) {
+      rect(0, 0, canvas.width, canvas.height, 'black');
+      text('white', '75px Exo', 'GAME OVER', 100, 200)
+      setTimeout(restart, 2000)
+    }
+
+    if(finishGame) {
+      rect(0, 0, canvas.width, canvas.height, 'green');
+      text('white', '75px Exo', 'YOU WIN', 150, 200)
+    }
+
   };
-  let chekCollision = function(rect1, rect2){
+
+  let text = (color, fnt, txt, x, y) => {
+    ctx.fillStyle = color;
+    ctx.font = fnt;
+    ctx.fillText(txt, x, y)
+  }
+
+  let rect = (x, y, w, h, c) => {
+    ctx.fillStyle = c;
+    ctx.fillRect(x, y, w, h);
+  }
+
+  let restart = () => {
+    window.location = ""
+  }
+
+  let chekCollision = (rect1, rect2) => {
     let closeOnWidth= Math.abs(rect1.x - rect2.x) <= Math.abs(rect1.w, rect2.w);
     let closeOnHeight = Math.abs(rect1.y - rect2.y) <= Math.abs(rect1.h, rect2.h);
     return closeOnHeight && closeOnWidth;
   }
+
   load();
   step();
 });
