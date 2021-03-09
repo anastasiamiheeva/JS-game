@@ -5,14 +5,16 @@ window.addEventListener('load', function() {
 
  let gameLive = true;
  let gameOver = false;
+ let finishGame = false;
+ 
  //враги
  let enemies = [
    {
-     x: 100, //x координата
-     y: 100, //y координата
-     speedY: 1, //скорость по Y
-     w: 40, //ширина
-     h: 40, //высота
+     x: 100, 
+     y: 100, 
+     speedY: 1, 
+     w: 40, 
+     h: 40, 
      color: "#BA55D3"
    },
    {
@@ -26,15 +28,15 @@ window.addEventListener('load', function() {
    {
      x: 380,
      y: 100,
-     speedY: 1,
+     speedY: 3,
      w: 40,
      h: 40,
      color: "#0FC0FC"
    },
    {
-     x: 450,
+     x: 550,
      y: 100,
-     speedY: 3,
+     speedY: 1,
      w: 40,
      h: 40,
      color: "#40E0D0"
@@ -42,7 +44,6 @@ window.addEventListener('load', function() {
  ];
 
  //объект игрока
-
   let player = { 
     x1: 10, 
     y1: 160, 
@@ -74,7 +75,6 @@ window.addEventListener('load', function() {
   canvas.addEventListener("touchend", stopPlayer);
 
   //логика объектов
-
   let update = () => {
     //игрок
     if(player.isMoving) {
@@ -82,7 +82,11 @@ window.addEventListener('load', function() {
       player.x2 += player.speedX
       player.x3 += player.speedX
     }
-    
+
+    if(player.x2 > GAME_WIDTH) {
+      finishGame = true;
+    }
+
     //враги
     let i = 0;
     let n = enemies.length;
@@ -95,28 +99,28 @@ window.addEventListener('load', function() {
       }
       element.y += element.speedY;
       //соприкосновение объектов
-    if(element.y <= 10) {
-      element.y = 10;
-      element.speedY = element.speedY * -1; //element.speedY *= -1
-    } 
-    else if (element.y >= GAME_HEIGHT - 50) {
-      element.y = GAME_HEIGHT - 50;
-      element.speedY = element.speedY * -1;
-    }
+      if(element.y <= 10) {
+        element.y = 10;
+        element.speedY = element.speedY * -1; //element.speedY *= -1
+      } 
+      else if (element.y >= GAME_HEIGHT - 50) {
+        element.y = GAME_HEIGHT - 50;
+        element.speedY = element.speedY * -1;
+      }
     })
   };
   
   //показать объекты на экране
-  let draw = function() {
+  let draw = () => {
     //чистим холст
     ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
     //объект игрока
     ctx.fillStyle = player.color;
     ctx.beginPath();
     ctx.moveTo(player.x1,player.y1);
     ctx.lineTo(player.x2,player.y2);
     ctx.lineTo(player.x3,player.y3);
-    //ctx.closePath()
     ctx.fill();
 
     //объекты врагов
@@ -141,14 +145,20 @@ window.addEventListener('load', function() {
   let step = function() {
     update();
     draw();
+
     if(gameLive){
       window.requestAnimationFrame(step);
     }
 
     if(gameOver) {
-      rect(0, 0, canvas.width, canvas.height, 'green');
+      rect(0, 0, canvas.width, canvas.height, 'black');
       text('white', '75px Exo', 'GAME OVER', 100, 200)
-      setTimeout(restart, 4000)
+      setTimeout(restart, 2000)
+    }
+
+    if(finishGame) {
+      rect(0, 0, canvas.width, canvas.height, 'green');
+      text('white', '75px Exo', 'FINISH', 200, 200)
     }
   };
 
@@ -156,10 +166,11 @@ window.addEventListener('load', function() {
     window.location = ""
   }
 
-  let chekCollision = function(point, rect){
-    let closeOnWidth
-    let closeOnHeight 
+  let chekCollision = (point, rect) => {
+    let closeOnWidth = Math.abs(point.x1 - rect.x) <= Math.abs((point.x2 - point.x1), rect.w);
+    let closeOnHeight = Math.abs((point.y1-rect.y)) <= Math.abs((point.y3-point.y1), rect.h);
     return closeOnHeight && closeOnWidth;
-  }   
+  } 
+  
   step();
 })
